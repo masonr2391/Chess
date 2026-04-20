@@ -11,38 +11,59 @@
     <style>
         body { background-color: #0f172a; color: white; font-family: system-ui, sans-serif; }
         
-        /* Board Container */
+        /* Main Board Container */
+        .board-wrapper {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
         #myBoard { 
             width: 100%; 
-            max-width: 500px; 
-            margin: 0 auto;
             border: 4px solid #334155; 
             border-radius: 4px; 
         }
 
-        /* --- THE FIXED SPARE PIECE LAYOUT --- */
-        /* This forces the 'off-board' pieces to sit in a horizontal row */
+        /* --- THE SPREAD OUT SPARE PIECE LAYOUT --- */
+        /* This targets the top and bottom trays */
         div[class^="spare-pieces"] {
             display: flex !important;
             flex-direction: row !important;
-            justify-content: center !important;
+            /* This spreads pieces out evenly across the board width */
+            justify-content: space-around !important; 
             align-items: center !important;
             background: #1e293b !important;
-            padding: 10px !important;
-            height: auto !important;
+            padding: 12px 5px !important;
+            height: 70px !important; /* Give them more height so they aren't cramped */
             width: 100% !important;
-            gap: 5px !important;
-            border: 1px solid #334155 !important;
+            box-sizing: border-box !important;
+            border-left: 4px solid #334155 !important;
+            border-right: 4px solid #334155 !important;
         }
 
-        /* This fixes the size of the individual 'off-board' pieces */
+        /* Top tray specific styling */
+        div[class^="spare-pieces-top"] {
+            border-top: 4px solid #334155 !important;
+            border-top-left-radius: 8px !important;
+            border-top-right-radius: 8px !important;
+        }
+
+        /* Bottom tray specific styling */
+        div[class^="spare-pieces-bottom"] {
+            border-bottom: 4px solid #334155 !important;
+            border-bottom-left-radius: 8px !important;
+            border-bottom-right-radius: 8px !important;
+        }
+
+        /* This fixes the size and spacing of individual off-board pieces */
         div[class^="spare-piece"] {
-            width: 45px !important;
-            height: 45px !important;
-            position: static !important; /* Removes the vertical stacking logic */
+            width: 50px !important;
+            height: 50px !important;
+            position: relative !important; /* Allows them to sit side-by-side */
+            float: none !important;
+            display: block !important;
         }
 
-        /* Make sure pieces on the board still look right */
         .chessboard-63f59 img {
             display: block !important;
             width: 100% !important;
@@ -53,7 +74,7 @@
 
     <div class="max-w-6xl w-full flex flex-col lg:flex-row gap-10 items-center lg:items-start">
         
-        <div class="flex-1 w-full max-w-[500px]">
+        <div class="board-wrapper">
             <div id="myBoard"></div>
             <div class="mt-6 p-4 bg-slate-800 rounded-lg border border-slate-700 text-center">
                 <span class="text-slate-400 font-mono text-xs uppercase">Game Status:</span>
@@ -97,7 +118,7 @@
         var $status = $('#status');
         var isGameRunning = false;
 
-        // Piece Values
+        // Piece Values for AI
         var weights = { p: 10, r: 50, n: 30, b: 30, q: 90, k: 900 };
 
         function makeBestMove() {
@@ -157,12 +178,12 @@
             else $status.html(turn + ' to move');
         }
 
-        // Controls
+        // Button Click Handlers
         $('#startBtn').on('click', function() {
             var pos = board.fen();
             var valid = game.load(pos + " w KQkq - 0 1");
             if (!valid) {
-                alert("Please ensure both kings are on the board before starting.");
+                alert("The board setup is invalid. Do you have both kings?");
                 return;
             }
             isGameRunning = true;
