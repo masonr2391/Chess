@@ -11,96 +11,108 @@
     <style>
         body { background-color: #0f172a; color: white; font-family: system-ui, sans-serif; }
         
-        .board-wrapper {
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
             width: 100%;
             max-width: 500px;
             margin: 0 auto;
         }
 
+        /* --- THE MANUAL PIECE TRAY --- */
+        .piece-tray {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-around !important;
+            align-items: center !important;
+            width: 100% !important;
+            background: #1e293b !important;
+            padding: 10px !important;
+            border: 4px solid #334155 !important;
+            border-radius: 8px !important;
+            box-sizing: border-box !important;
+        }
+
+        .tray-piece {
+            width: 50px;
+            height: 50px;
+            cursor: grab;
+            transition: transform 0.2s;
+        }
+
+        .tray-piece:active { cursor: grabbing; transform: scale(1.1); }
+
         #myBoard { 
             width: 100%; 
             border: 4px solid #334155;
+            border-radius: 4px;
         }
 
-        /* --- THE FINAL HORIZONTAL FIX --- */
-        /* We force the containers to be flex rows and ignore the library's default stacking */
-        .spare-pieces-74527 {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            background: #1e293b !important;
-            padding: 10px !important;
-            height: 65px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-            border-left: 4px solid #334155 !important;
-            border-right: 4px solid #334155 !important;
+        /* Hide the library's broken spare pieces entirely */
+        .spare-pieces-74527, [class^="spare-pieces"] {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
             overflow: hidden !important;
         }
 
-        /* Top tray specific */
-        .spare-pieces-top-402ef {
-            border-top: 4px solid #334155 !important;
-            border-top-left-radius: 8px !important;
-            border-top-right-radius: 8px !important;
-        }
-
-        /* Bottom tray specific */
-        .spare-pieces-bottom-ae33f {
-            border-bottom: 4px solid #334155 !important;
-            border-bottom-left-radius: 8px !important;
-            border-bottom-right-radius: 8px !important;
-        }
-
-        /* Fix individual pieces to stay in line */
-        .spare-piece-af5f1 {
-            position: relative !important;
-            float: none !important;
-            width: 14% !important; /* Spreads 6 pieces across 100% width */
-            height: auto !important;
-            display: block !important;
-        }
-
-        .chessboard-63f59 img {
-            display: block !important;
-            width: 100% !important;
-        }
-
-        /* Ensure the status bar stays at the bottom */
-        .status-container {
-            clear: both;
+        .status-box {
             width: 100%;
-            margin-top: 20px;
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+<body class="min-h-screen p-4 md:p-10">
 
-    <div class="max-w-6xl w-full flex flex-col lg:flex-row gap-10 items-center lg:items-start">
+    <div class="flex flex-col lg:flex-row justify-center gap-10 items-start max-w-7xl mx-auto">
         
-        <div class="board-wrapper">
+        <div class="main-container">
+            <div class="piece-tray" id="blackTray">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bK.png" class="tray-piece" data-piece="bK">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png" class="tray-piece" data-piece="bQ">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bR.png" class="tray-piece" data-piece="bR">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bB.png" class="tray-piece" data-piece="bB">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bN.png" class="tray-piece" data-piece="bN">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bP.png" class="tray-piece" data-piece="bP">
+            </div>
+
             <div id="myBoard"></div>
-            
-            <div class="status-container p-4 bg-slate-800 rounded-lg border border-slate-700 text-center shadow-lg">
-                <span class="text-slate-400 font-mono text-xs uppercase">Game Status:</span>
+
+            <div class="piece-tray" id="whiteTray">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wK.png" class="tray-piece" data-piece="wK">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png" class="tray-piece" data-piece="wQ">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wR.png" class="tray-piece" data-piece="wR">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wB.png" class="tray-piece" data-piece="wB">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wN.png" class="tray-piece" data-piece="wN">
+                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wP.png" class="tray-piece" data-piece="wP">
+            </div>
+
+            <div class="status-box">
+                <span class="text-slate-400 font-mono text-xs uppercase tracking-widest">Status:</span>
                 <span id="status" class="text-indigo-400 font-bold ml-2 text-lg">Ready</span>
             </div>
         </div>
 
         <div class="w-full lg:w-80 space-y-6">
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-2xl">
-                <h1 class="text-xl font-black mb-4 border-b border-slate-700 pb-2 text-indigo-400 uppercase tracking-tighter">AI Board Editor</h1>
+                <h1 class="text-2xl font-black mb-6 text-indigo-400 border-b border-slate-700 pb-2">AI EDITOR</h1>
                 
-                <div class="space-y-3">
-                    <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-bold transition active:scale-95 text-white">Start AI Game</button>
-                    <button id="resetBtn" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold transition text-white">Standard Start</button>
-                    <button id="clearBtn" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold transition text-white">Clear Board</button>
+                <div class="space-y-4">
+                    <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-lg font-bold transition shadow-lg active:scale-95">START AI GAME</button>
+                    <button id="resetBtn" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold transition">STANDARD START</button>
+                    <button id="clearBtn" class="w-full bg-rose-900/30 hover:bg-rose-800 border border-rose-800/50 py-3 rounded-lg font-semibold transition">CLEAR BOARD</button>
                 </div>
 
-                <div class="mt-6">
-                    <label class="text-xs font-bold text-slate-500 uppercase">AI Difficulty</label>
-                    <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-2 rounded text-white cursor-pointer outline-none">
+                <div class="mt-8">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-tighter">AI Difficulty</label>
+                    <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded-lg text-white cursor-pointer outline-none">
                         <option value="2">Level 1: Fast</option>
                         <option value="3" selected>Level 2: Normal</option>
                         <option value="4">Level 3: Strategic</option>
@@ -108,10 +120,9 @@
                 </div>
             </div>
 
-            <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 text-[11px] text-slate-400 leading-relaxed">
-                <p class="font-bold text-slate-300 mb-1">EDITOR MODE:</p>
-                Drag the pieces from the horizontal rows into the board to set a position. 
-                Click <span class="text-indigo-400">Start AI Game</span> to begin analysis.
+            <div class="bg-slate-900/50 p-5 rounded-lg border border-slate-700 text-xs text-slate-400 leading-relaxed shadow-inner">
+                <p><strong>HOW TO EDIT:</strong></p>
+                <p class="mt-2">Drag pieces from the horizontal trays into any square. To remove a piece, just drag it off the board. Once the setup is done, click Start.</p>
             </div>
         </div>
     </div>
@@ -126,8 +137,22 @@
         var $status = $('#status');
         var isGameRunning = false;
 
-        // Simple evaluation weights
+        // AI Weights
         var weights = { p: 10, r: 50, n: 30, b: 30, q: 90, k: 900 };
+
+        function evaluateBoard(board) {
+            var total = 0;
+            for (var i = 0; i < 8; i++) {
+                for (var j = 0; j < 8; j++) {
+                    var piece = board[i][j];
+                    if (piece) {
+                        var val = weights[piece.type];
+                        total += (piece.color === 'w' ? val : -val);
+                    }
+                }
+            }
+            return total;
+        }
 
         function makeBestMove() {
             if (game.game_over()) return;
@@ -147,28 +172,9 @@
                     bestMove = moves[i];
                 }
             }
-
             game.move(bestMove);
             board.position(game.fen());
             updateStatus();
-        }
-
-        function evaluateBoard(board) {
-            var total = 0;
-            for (var i = 0; i < 8; i++) {
-                for (var j = 0; j < 8; j++) {
-                    var piece = board[i][j];
-                    if (piece) {
-                        var val = weights[piece.type];
-                        total += (piece.color === 'w' ? val : -val);
-                    }
-                }
-            }
-            return total;
-        }
-
-        function onDragStart (source, piece) {
-            if (game.game_over()) return false;
         }
 
         function onDrop (source, target) {
@@ -182,16 +188,16 @@
         function updateStatus () {
             var turn = (game.turn() === 'b') ? 'Black' : 'White';
             if (game.in_checkmate()) $status.html('CHECKMATE - ' + turn.toUpperCase() + ' LOSES');
-            else if (game.in_draw()) $status.html('DRAW GAME');
+            else if (game.in_draw()) $status.html('DRAW');
             else $status.html(turn + ' to move');
         }
 
-        // Button Click Handlers
+        // --- BUTTONS ---
         $('#startBtn').on('click', function() {
             var pos = board.fen();
             var valid = game.load(pos + " w KQkq - 0 1");
             if (!valid) {
-                alert("Invalid position! Make sure both kings are on the board.");
+                alert("Missing Kings! Please add both kings to the board.");
                 return;
             }
             isGameRunning = true;
@@ -212,26 +218,26 @@
             $status.html('Board Cleared');
         });
 
-        function pieceTheme (piece) {
-            return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
-        }
+        // --- THE FIX: MANUALLY CONNECTING PIECES TO BOARD ---
+        $(document).on('mousedown', '.tray-piece', function(e) {
+            if (isGameRunning) return;
+            var piece = $(this).attr('data-piece');
+            // This triggers the library's internal drag for the piece
+            board.addSparePiece(piece);
+        });
 
         var config = {
             draggable: true,
             dropOffBoard: 'trash',
-            sparePieces: true,
+            sparePieces: false, // Turned OFF to prevent library bugs
             position: 'start',
-            pieceTheme: pieceTheme,
-            onDragStart: onDragStart,
+            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
             onDrop: onDrop,
             onSnapEnd: function() { board.position(game.fen()); }
         };
         board = Chessboard('myBoard', config);
 
-        // Final cleanup to ensure layout is perfect
-        window.onload = function() {
-            board.resize();
-        };
+        window.onload = function() { board.resize(); };
     </script>
 </body>
 </html>
