@@ -2,22 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chess AI & Editor</title>
+    <title>Advanced Chess AI & Analysis</title>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: white; font-family: sans-serif; overflow-x: hidden; }
+        body { background-color: #0f172a; color: white; font-family: sans-serif; }
         .editor-container { display: flex; gap: 15px; margin: 0 auto; align-items: flex-start; }
         .vertical-tray { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #1e293b; border: 2px solid #334155; border-radius: 8px; }
         .tray-piece { width: 45px; height: 45px; cursor: grab; }
         #myBoard { width: 500px; border: 4px solid #334155; position: relative; }
-        /* Feedback Icons Styles */
-        .move-feedback-icon { position: absolute; z-index: 100; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-weight: bold; top: -5px; right: -5px; pointer-events: none; }
-        .feedback-brilliant { background-color: #03a9f4; } .feedback-greatmove { background-color: #0288d1; }
-        .feedback-bestmove { background-color: #a7ffeb; color: #1e3a8a; } .feedback-excellent { background-color: #69f0ae; color: #1a4d1a; }
-        .feedback-good { background-color: #b9f6ca; color: #1a4d1a; } .feedback-inaccuracy { background-color: #ffd54f; color: #4e342e; }
-        .feedback-mistake { background-color: #ff9800; } .feedback-miss { background-color: #e57373; }
-        .feedback-blunder { background-color: #b71c1c; }
+
+        /* RECREATED ICONS CSS */
+        .move-feedback-icon {
+            position: absolute; z-index: 100; width: 32px; height: 32px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            border: 2px solid white; font-weight: 900; top: -8px; right: -8px;
+            pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .fb-brilliant { background: #15bc9c; color: #fff; } /* !! */
+        .fb-greatmove { background: #40a9ff; color: #fff; } /* ! */
+        .fb-bestmove { background: #96bc4b; color: #fff; }  /* Star */
+        .fb-excellent { background: #b1c43d; color: #fff; } /* Thumb */
+        .fb-good { background: #8da192; color: #fff; }      /* Check */
+        .fb-book { background: #d5a47d; color: #fff; }      /* Book */
+        .fb-inaccuracy { background: #f0c15c; color: #fff; } /* ?! */
+        .fb-mistake { background: #e58f2a; color: #fff; }    /* ? */
+        .fb-miss { background: #f64d4d; color: #fff; }       /* Ø */
+        .fb-blunder { background: #b33430; color: #fff; }    /* ?? */
+
         [class^="spare-pieces"] { display: none !important; }
     </style>
 </head>
@@ -34,15 +46,15 @@
             <div class="vertical-tray" id="whiteTray"></div>
         </div>
         <div class="w-80 bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h1 class="text-xl font-black mb-6 text-indigo-400">AI CONTROL</h1>
-            <button id="startBtn" class="w-full bg-indigo-600 py-3 rounded mb-2 font-bold">START AI GAME</button>
-            <button id="resetBtn" class="w-full bg-slate-700 py-3 rounded mb-2 font-semibold">RESET BOARD</button>
-            <button id="clearBtn" class="w-full bg-slate-700 py-3 rounded mb-6 font-semibold">CLEAR BOARD</button>
-            <label class="text-xs font-bold text-slate-500 uppercase">Difficulty</label>
+            <h1 class="text-xl font-black mb-6 text-indigo-400 uppercase">Analysis Engine</h1>
+            <button id="startBtn" class="w-full bg-indigo-600 py-3 rounded mb-2 font-bold hover:bg-indigo-500">START GAME</button>
+            <button id="resetBtn" class="w-full bg-slate-700 py-3 rounded mb-2 font-semibold">RESET</button>
+            <button id="clearBtn" class="w-full bg-slate-700 py-3 rounded mb-6 font-semibold">CLEAR</button>
+            <label class="text-xs font-bold text-slate-500 uppercase">Analysis Depth</label>
             <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded text-white">
-                <option value="2">Level 1</option>
-                <option value="3" selected>Level 2</option>
-                <option value="4">Level 3</option>
+                <option value="3">Fast (Depth 3)</option>
+                <option value="4" selected>Standard (Depth 4)</option>
+                <option value="5">Deep (Depth 5)</option>
             </select>
         </div>
     </div>
@@ -54,28 +66,44 @@
         var board = null, game = new Chess(), isGameRunning = false;
         var aiWorker = new Worker('worker.js');
 
-        function applyFeedback(square, type, char) {
+        const symbolMap = {
+            'brilliant': '!!', 'greatmove': '!', 'bestmove': '★', 
+            'excellent': '👍', 'good': '✓', 'book': '📖', 
+            'inaccuracy': '?!', 'mistake': '?', 'miss': 'Ø', 'blunder': '??'
+        };
+
+        function applyFeedback(square, type) {
             $('.move-feedback-icon').remove();
-            $('#myBoard .square-' + square).append(`<div class="move-feedback-icon feedback-${type}">${char}</div>`);
+            const char = symbolMap[type] || '✓';
+            $('#myBoard .square-' + square).append(`<div class="move-feedback-icon fb-${type}">${char}</div>`);
         }
 
         aiWorker.onmessage = function(e) {
-            const move = game.move(e.data.move);
-            board.position(game.fen());
-            applyFeedback(move.to, "bestmove", "★"); // AI always tries to find "Best"
-            $('#status').text(game.turn() === 'w' ? "White's Turn" : "Black's Turn");
+            if (e.data.type === 'feedback') {
+                applyFeedback(e.data.square, e.data.rating);
+            } else if (e.data.type === 'move') {
+                game.move(e.data.move);
+                board.position(game.fen());
+                $('#status').text(game.turn() === 'w' ? "White's Turn" : "Black's Turn");
+            }
         };
 
         function onDrop(source, target) {
             if (!isGameRunning) return;
+            const fenBefore = game.fen();
             const move = game.move({ from: source, to: target, promotion: 'q' });
             if (!move) return 'snapback';
-            applyFeedback(target, "good", "✓");
-            $('#status').text("AI is thinking...");
-            aiWorker.postMessage({ fen: game.fen(), depth: $('#difficulty').val() });
+            
+            $('#status').text("Engine Analyzing...");
+            aiWorker.postMessage({ 
+                type: 'analyze', 
+                fenBefore: fenBefore, 
+                fenAfter: game.fen(), 
+                move: move, 
+                depth: $('#difficulty').val() 
+            });
         }
 
-        // Initialize Trays
         ['k','q','r','b','n','p'].forEach(p => {
             $('#blackTray').append(`<img src="https://chessboardjs.com/img/chesspieces/wikipedia/b${p.toUpperCase()}.png" class="tray-piece" data-piece="b${p.toUpperCase()}">`);
             $('#whiteTray').append(`<img src="https://chessboardjs.com/img/chesspieces/wikipedia/w${p.toUpperCase()}.png" class="tray-piece" data-piece="w${p.toUpperCase()}">`);
