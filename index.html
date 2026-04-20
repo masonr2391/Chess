@@ -11,141 +11,130 @@
     <style>
         body { background-color: #0f172a; color: white; font-family: system-ui, sans-serif; overflow-x: hidden; }
         
-        .main-container {
+        .editor-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-            max-width: 500px;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 15px;
             margin: 0 auto;
         }
 
-        /* Tray pieces still vertical and fixed */
-        .piece-tray {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-around !important;
-            align-items: center !important;
-            width: 100% !important;
-            background: #1e293b !important;
-            padding: 10px !important;
-            border: 4px solid #334155 !important;
-            border-radius: 8px !important;
-            box-sizing: border-box !important;
+        /* Vertical Trays on the sides */
+        .vertical-tray {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 8px;
         }
 
         .tray-piece {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             cursor: grab;
-            transition: transform 0.2s;
+            transition: transform 0.1s;
         }
 
         #myBoard { 
-            width: 100%; 
+            width: 500px; 
             border: 4px solid #334155;
             border-radius: 4px;
-            position: relative; /* Essential for overlaying icons */
+            position: relative;
         }
 
-        /* Library spare pieces must remain hidden */
-        .spare-pieces-74527, [class^="spare-pieces"] {
-            display: none !important;
-            visibility: hidden !important;
-        }
+        /* Hide library broken elements */
+        [class^="spare-pieces"] { display: none !important; }
 
-        /* --- THE FEEDBACK ICONS (SVG-based for performance and resolution) --- */
+        /* Feedback Icons */
         .move-feedback-icon {
             position: absolute;
             z-index: 100;
-            width: 26px;  /* Sized to fit top-right of the square */
-            height: 26px;
-            pointer-events: none; /* Icon shouldn't interfere with interaction */
+            width: 28px;
+            height: 28px;
+            pointer-events: none;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 5px rgba(0,0,0,0.6);
             border: 2px solid white;
+            font-size: 14px;
+            font-weight: bold;
+            top: -5px;
+            right: -5px;
         }
 
-        /* Specific colors based on the third image */
-        .feedback-brilliant { background-color: #03a9f4; color: white; }
-        .feedback-greatmove { background-color: #0288d1; color: white; }
+        .feedback-brilliant { background-color: #03a9f4; }
+        .feedback-greatmove { background-color: #0288d1; }
         .feedback-bestmove { background-color: #a7ffeb; color: #1e3a8a; }
         .feedback-excellent { background-color: #69f0ae; color: #1a4d1a; }
         .feedback-good { background-color: #b9f6ca; color: #1a4d1a; }
-        .feedback-book { background-color: #d7ccc8; color: #4e342e; }
         .feedback-inaccuracy { background-color: #ffd54f; color: #4e342e; }
-        .feedback-mistake { background-color: #ff9800; color: white; }
-        .feedback-miss { background-color: #e57373; color: white; }
-        .feedback-blunder { background-color: #b71c1c; color: white; font-weight: bold; }
+        .feedback-mistake { background-color: #ff9800; }
+        .feedback-miss { background-color: #e57373; }
+        .feedback-blunder { background-color: #b71c1c; }
 
-        .status-box {
+        .status-area {
             width: 100%;
+            max-width: 500px;
             background: #1e293b;
             padding: 15px;
+            margin-top: 20px;
             border-radius: 8px;
             border: 1px solid #334155;
             text-align: center;
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-10 flex flex-col justify-center">
+<body class="min-h-screen p-4 md:p-10 flex justify-center">
 
-    <div class="flex flex-col lg:flex-row justify-center gap-10 items-start max-w-7xl mx-auto">
-        
-        <div class="main-container">
-            <div class="piece-tray" id="blackTray">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bK.png" class="tray-piece" data-piece="bK">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png" class="tray-piece" data-piece="bQ">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bR.png" class="tray-piece" data-piece="bR">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bB.png" class="tray-piece" data-piece="bB">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bN.png" class="tray-piece" data-piece="bN">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bP.png" class="tray-piece" data-piece="bP">
+    <div class="flex flex-col lg:flex-row gap-10 items-start">
+        <div class="flex flex-col items-center">
+            <div class="editor-container">
+                <div class="vertical-tray">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bK.png" class="tray-piece" data-piece="bK">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png" class="tray-piece" data-piece="bQ">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bR.png" class="tray-piece" data-piece="bR">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bB.png" class="tray-piece" data-piece="bB">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bN.png" class="tray-piece" data-piece="bN">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bP.png" class="tray-piece" data-piece="bP">
+                </div>
+
+                <div id="myBoard"></div>
+
+                <div class="vertical-tray">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wK.png" class="tray-piece" data-piece="wK">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png" class="tray-piece" data-piece="wQ">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wR.png" class="tray-piece" data-piece="wR">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wB.png" class="tray-piece" data-piece="wB">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wN.png" class="tray-piece" data-piece="wN">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wP.png" class="tray-piece" data-piece="wP">
+                </div>
             </div>
 
-            <div id="myBoard"></div>
-
-            <div class="piece-tray" id="whiteTray">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wK.png" class="tray-piece" data-piece="wK">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png" class="tray-piece" data-piece="wQ">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wR.png" class="tray-piece" data-piece="wR">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wB.png" class="tray-piece" data-piece="wB">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wN.png" class="tray-piece" data-piece="wN">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wP.png" class="tray-piece" data-piece="wP">
-            </div>
-
-            <div class="status-box">
-                <span class="text-slate-500 font-mono text-xs uppercase tracking-widest">Status:</span>
-                <span id="status" class="text-indigo-400 font-bold ml-2 text-xl">Ready</span>
+            <div class="status-area">
+                <span id="status" class="text-indigo-400 font-bold text-lg">Ready</span>
             </div>
         </div>
 
-        <div class="w-full lg:w-80 space-y-6">
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-2xl">
-                <h1 class="text-2xl font-black mb-6 text-indigo-400 border-b border-slate-700 pb-2">AI EDITOR</h1>
-                
+        <div class="w-80 space-y-6">
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                <h1 class="text-xl font-black mb-6 text-indigo-400 border-b border-slate-700 pb-2 uppercase">Control Panel</h1>
                 <div class="space-y-4">
-                    <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-lg font-bold transition shadow-lg active:scale-95 text-white">START AI GAME</button>
-                    <button id="resetBtn" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold transition text-white">STANDARD START</button>
-                    <button id="clearBtn" class="w-full bg-slate-700 hover:bg-slate-600/50 py-3 rounded-lg font-semibold transition text-white">CLEAR BOARD</button>
+                    <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-lg font-bold">START GAME</button>
+                    <button id="resetBtn" class="w-full bg-slate-700 py-3 rounded-lg font-semibold">RESET</button>
+                    <button id="clearBtn" class="w-full bg-slate-700 py-3 rounded-lg font-semibold">CLEAR</button>
                 </div>
-
                 <div class="mt-8">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-tighter">AI Difficulty / Analysis Depth</label>
-                    <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded-lg text-white cursor-pointer outline-none">
-                        <option value="2">Level 1: Quick (Depth 2)</option>
-                        <option value="3" selected>Level 2: Normal (Depth 3)</option>
-                        <option value="4">Level 3: Strategic (Depth 4)</option>
+                    <label class="text-xs font-bold text-slate-500 uppercase">AI Level</label>
+                    <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded-lg text-white">
+                        <option value="2">Level 1</option>
+                        <option value="3" selected>Level 2</option>
+                        <option value="4">Level 3 (Slow)</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="bg-slate-900/50 p-5 rounded-lg border border-slate-700 text-xs text-slate-400 leading-relaxed shadow-inner">
-                <p><strong>HOW TO EDIT:</strong></p>
-                <p class="mt-2">Drag pieces from the trays into any square. Drag a piece off the board to remove it. Once the setup is done, click Start AI Game. After each move, a feedback icon will appear.</p>
             </div>
         </div>
     </div>
@@ -155,279 +144,121 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
     <script>
-        // --- CHESS LOGIC ENHANCED AI ---
         var board = null;
         var game = new Chess();
-        var $status = $('#status');
         var isGameRunning = false;
-        var transpositionTable = new Map();
 
-        // Enhanced Piece and Positional Weights
-        const values = { p: 100, r: 500, n: 320, b: 330, q: 900, k: 20000 };
-
-        // Evaluation scores based on board position (piece-square tables)
-        const pawnEval = [
-            [0,0,0,0,0,0,0,0],[5,10,10,-20,-20,10,10,5],[5,-5,-10,0,0,-10,-5,5],[0,0,0,20,20,0,0,0],
-            [5,5,10,25,25,10,5,5],[10,10,20,30,30,20,10,10],[50,50,50,50,50,50,50,50],[0,0,0,0,0,0,0,0]
-        ];
-        const knightEval = [
-            [-50,-40,-30,-30,-30,-30,-40,-50],[-40,-20,0,5,5,0,-20,-40],[-30,5,10,15,15,10,5,-30],[-30,0,15,20,20,15,0,-30],
-            [-30,5,15,20,20,15,5,-30],[-30,0,10,15,15,10,0,-30],[-40,-20,0,0,0,0,-20,-40],[-50,-40,-30,-30,-30,-30,-40,-50]
-        ];
-        const bishopEval = [
-            [-20,-10,-10,-10,-10,-10,-10,-20],[-10,5,0,0,0,0,5,-10],[-10,10,10,10,10,10,10,-10],[-10,0,10,10,10,10,0,-10],
-            [-10,5,10,10,10,10,5,-10],[-10,0,5,10,10,5,0,-10],[-10,0,0,0,0,0,0,-10],[-20,-10,-10,-10,-10,-10,-10,-20]
-        ];
-        const rookEval = [
-            [0,0,0,5,5,0,0,0],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],
-            [-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[5,10,10,10,10,10,10,5],[0,0,0,0,0,0,0,0]
-        ];
-        const queenEval = [
-            [-20,-10,-10,-5,-5,-10,-10,-20],[-10,0,0,0,0,0,0,-10],[-10,0,5,5,5,5,0,-10],[-5,0,5,5,5,5,0,-5],
-            [0,0,5,5,5,5,0,-5],[-10,5,5,5,5,5,0,-10],[-10,0,5,0,0,0,0,-10],[-20,-10,-10,-5,-5,-10,-10,-20]
-        ];
-        const kingEval = [
-            [20,30,10,0,0,10,30,20],[20,20,0,0,0,0,20,20],[-10,-20,-20,-20,-20,-20,-20,-10],[-20,-30,-30,-40,-40,-30,-30,-20],
-            [-30,-40,-40,-50,-50,-40,-30,-20],[-30,-40,-40,-50,-50,-40,-30,-20],[-30,-40,-40,-50,-50,-40,-30,-20],[-30,-40,-40,-50,-50,-40,-30,-20]
-        ];
-
-        function getPieceScore(piece, x, y) {
-            let score = values[piece.type];
-            let pos;
-            if (piece.color === 'w') { pos = 7 - y; x = x; } // Adjust White positions
-            else { pos = y; x = 7 - x; } // Flip Black positions
-
-            if (piece.type === 'p') score += pawnEval[pos][x];
-            else if (piece.type === 'n') score += knightEval[pos][x];
-            else if (piece.type === 'b') score += bishopEval[pos][x];
-            else if (piece.type === 'r') score += rookEval[pos][x];
-            else if (piece.type === 'q') score += queenEval[pos][x];
-            else if (piece.type === 'k') score += kingEval[pos][x];
-            return score;
-        }
-
+        // --- AI EVALUATION ---
+        const pieceValues = { p: 100, r: 500, n: 320, b: 330, q: 900, k: 20000 };
+        
         function evaluateBoard(g) {
-            let totalVal = 0;
+            let total = 0;
             const b = g.board();
             for (let i = 0; i < 8; i++) {
                 for (let j = 0; j < 8; j++) {
-                    const piece = b[i][j];
-                    if (piece) totalVal += (piece.color === 'w' ? 1 : -1) * getPieceScore(piece, j, i);
+                    const p = b[i][j];
+                    if (p) total += (p.color === 'w' ? 1 : -1) * pieceValues[p.type];
                 }
             }
-            return totalVal;
+            return total;
         }
 
-        // IMPROVED AI Logic: Quiescence Search and Basic Memory
-        function makeBestMove(depth) {
-            if (game.game_over()) return;
-            transpositionTable.clear();
-            
-            const startTurn = game.turn();
-            const moves = game.moves({ verbose: true });
-            if (moves.length === 0) return;
-
-            let bestValue = startTurn === 'w' ? -Infinity : Infinity;
-            let bestMove;
-
-            moves.forEach(move => {
-                game.move(move);
-                const value = minimax(depth - 1, game, startTurn === 'w', -Infinity, Infinity);
-                game.undo();
-                if ((startTurn === 'w' && value > bestValue) || (startTurn === 'b' && value < bestValue)) {
-                    bestValue = value; bestMove = move;
+        function minimax(depth, g, alpha, beta, isMax) {
+            if (depth === 0 || g.game_over()) return evaluateBoard(g);
+            const moves = g.moves();
+            if (isMax) {
+                let best = -Infinity;
+                for (let m of moves) {
+                    g.move(m);
+                    best = Math.max(best, minimax(depth - 1, g, alpha, beta, !isMax));
+                    g.undo();
+                    alpha = Math.max(alpha, best);
+                    if (beta <= alpha) break;
                 }
-            });
-
-            const result = game.move(bestMove);
-            board.position(game.fen());
-            applyMoveFeedback(result, bestValue); // Calculate and Apply Feedback
-            updateStatus();
-        }
-
-        function minimax(depth, g, isMaximizing, alpha, beta) {
-            if (g.game_over()) {
-                if (g.in_checkmate()) return isMaximizing ? -20000 - depth : 20000 + depth;
-                if (g.in_draw()) return 0;
-            }
-            
-            if (depth === 0) return quiescenceSearch(g, isMaximizing, alpha, beta);
-
-            // Basic transposition check
-            const fen = g.fen().split(' ')[0]; // Key on piece positions
-            if (transpositionTable.has(fen + depth + isMaximizing)) return transpositionTable.get(fen + depth + isMaximizing);
-
-            const moves = g.moves({ verbose: true });
-            let bestValue = isMaximizing ? -Infinity : Infinity;
-
-            for (let i = 0; i < moves.length; i++) {
-                g.move(moves[i]);
-                const val = minimax(depth - 1, g, !isMaximizing, alpha, beta);
-                g.undo();
-                bestValue = isMaximizing ? Math.max(bestValue, val) : Math.min(bestValue, val);
-                if (isMaximizing) alpha = Math.max(alpha, bestValue); else beta = Math.min(beta, bestValue);
-                if (beta <= alpha) break;
-            }
-            transpositionTable.set(fen + depth + isMaximizing, bestValue);
-            return bestValue;
-        }
-
-        // Quiescence Search: Checks only captures at depth 0 to avoid immediate traps
-        function quiescenceSearch(g, isMaximizing, alpha, beta) {
-            const standPat = evaluateBoard(g);
-            if (isMaximizing) {
-                if (standPat >= beta) return beta;
-                if (alpha < standPat) alpha = standPat;
+                return best;
             } else {
-                if (standPat <= alpha) return alpha;
-                if (beta > standPat) beta = standPat;
+                let best = Infinity;
+                for (let m of moves) {
+                    g.move(m);
+                    best = Math.min(best, minimax(depth - 1, g, alpha, beta, !isMax));
+                    g.undo();
+                    beta = Math.min(beta, best);
+                    if (beta <= alpha) break;
+                }
+                return best;
             }
-
-            const captureMoves = g.moves({ verbose: true, captures_only: true });
-            if (captureMoves.length === 0) return standPat;
-
-            for (let i = 0; i < captureMoves.length; i++) {
-                g.move(captureMoves[i]);
-                const val = quiescenceSearch(g, !isMaximizing, alpha, beta);
-                g.undo();
-                if (isMaximizing) { if (val >= beta) return beta; alpha = Math.max(alpha, val);
-                } else { if (val <= alpha) return alpha; beta = Math.min(beta, val); }
-                if (beta <= alpha) break;
-            }
-            return isMaximizing ? alpha : beta;
         }
 
-        // --- THE FEEDBACK FEATURE: CALCULATE AND APPLY ---
-
-        function clearFeedbackIcons() {
-            $('.move-feedback-icon').remove();
-        }
-
-        function getFeedbackType(moveResult, moveValue) {
-            if (game.in_checkmate()) return { type: 'bestmove', char: '★' }; // Quick simplification
-
+        function makeAiMove() {
+            if (game.game_over()) return;
+            
+            const depth = parseInt($('#difficulty').val());
             const moves = game.moves();
-            const currentTurn = game.turn();
-            
-            if (currentTurn === 'w' && game.in_check() && game.in_draw()) return { type: 'miss', char: '×' };
+            let bestMove = null;
+            let bestValue = game.turn() === 'w' ? -Infinity : Infinity;
 
-            // We need to compare the move played to alternatives to get truly accurate feedback.
-            // Simplified logic: Evaluate pieces lost/gained in the last turn vs expected val
-            // To get true brilliant/blunder detection requires shallow Stockfish analysis or
-            // very deep minimax, which is not possible in this single-file setup.
-            
-            // This basic logic approximates the relative change in material value
-            if (moveValue > 300) return { type: 'brilliant', char: '!!' };
-            if (moveValue > 150) return { type: 'greatmove', char: '!' };
-            if (moveValue > 50) return { type: 'bestmove', char: '★' };
-            if (moveValue > 20) return { type: 'excellent', char: '👍' };
-            if (moveValue >= -10) return { type: 'good', char: '✓' };
-            if (moveResult.flags === 'q' && moveValue < -50) return { type: 'mistake', char: '?' }; // Promote trap
-            if (moveValue < -200) return { type: 'blunder', char: '??' };
-            if (moveValue < -100) return { type: 'miss', char: '×' };
-            if (moveValue < -40) return { type: 'inaccuracy', char: '?!' };
-
-            // Default to 'Good' for moves with minimal immediate value change
-            return { type: 'good', char: '✓' };
-        }
-
-        function applyMoveFeedback(moveResult, moveValue) {
-            clearFeedbackIcons(); // Clean previous icons
-            if (isGameRunning && moveResult && moveResult.to) {
-                const targetSquare = moveResult.to;
-                // Create overlay icon exactly like example
-                const feedback = getFeedbackType(moveResult, moveValue);
-                const iconElement = $(`<div class="move-feedback-icon feedback-${feedback.type}">${feedback.char}</div>`);
-                
-                // Add the icon as a sibling to the piece in the square
-                $('#myBoard .square-' + targetSquare).append(iconElement);
+            for (let m of moves) {
+                game.move(m);
+                let boardVal = minimax(depth - 1, game, -Infinity, Infinity, game.turn() === 'w');
+                game.undo();
+                if (game.turn() === 'w' && boardVal > bestValue) { bestValue = boardVal; bestMove = m; }
+                else if (game.turn() === 'b' && boardVal < bestValue) { bestValue = boardVal; bestMove = m; }
             }
+
+            const moveInfo = game.move(bestMove);
+            board.position(game.fen());
+            applyFeedback(moveInfo.to, "bestmove", "★");
+            updateStatus();
         }
 
-        // --- BOARD EVENTS ---
-        function onDragStart (source, piece) {
-            if (game.game_over()) return false;
-            // Clear feedback immediately upon picking up a piece
-            clearFeedbackIcons();
+        // --- FEEDBACK SYSTEM ---
+        function applyFeedback(square, type, char) {
+            $('.move-feedback-icon').remove();
+            const icon = `<div class="move-feedback-icon feedback-${type}">${char}</div>`;
+            $('#myBoard .square-' + square).append(icon);
         }
 
-        function onDrop (source, target) {
+        function updateStatus() {
+            let status = game.turn() === 'w' ? "White's Turn" : "Black's Turn";
+            if (game.in_checkmate()) status = "Checkmate!";
+            $('#status').text(status);
+        }
+
+        // --- HANDLERS ---
+        function onDrop(source, target) {
             if (!isGameRunning) return;
-            var move = game.move({ from: source, to: target, promotion: 'q' });
+            const move = game.move({ from: source, to: target, promotion: 'q' });
             if (move === null) return 'snapback';
-            
-            // Calculate and Apply feedback for User Move
-            const materialValueAfter = evaluateBoard(game);
-            applyMoveFeedback(move, materialValueAfter);
 
+            // User Feedback (Simple Logic)
+            applyFeedback(target, "good", "✓");
             updateStatus();
-            // IMPROVED AI: Use higher depth for more accurate feedback. 
-            // Warning: Depth 4 might introduce significant delay.
-            const currentDepth = parseInt($('#difficulty').val());
-            window.setTimeout(() => makeBestMove(currentDepth), 250);
+
+            // The "Anti-Freeze" Fix: Wait 100ms before AI starts
+            window.setTimeout(makeAiMove, 100);
         }
 
-        function updateStatus () {
-            var turn = (game.turn() === 'b') ? 'Black' : 'White';
-            if (game.in_checkmate()) $status.html('CHECKMATE - ' + turn.toUpperCase() + ' LOSES');
-            else if (game.in_draw()) $status.html('DRAW');
-            else {
-                let s = turn + ' to move';
-                if (game.in_check()) s += ' (Check!)';
-                $status.html(s);
-            }
-        }
-
-        // Controls
-        $('#startBtn').on('click', function() {
-            var pos = board.fen();
-            var valid = game.load(pos + " w KQkq - 0 1");
-            if (!valid) {
-                alert("The position is invalid. Do you have both Kings?");
-                return;
-            }
-            clearFeedbackIcons();
-            isGameRunning = true;
-            updateStatus();
-            $status.append(" - Game ON");
+        $('#startBtn').click(function() {
+            if (game.load(board.fen() + " w KQkq - 0 1")) {
+                isGameRunning = true;
+                updateStatus();
+            } else { alert("Setup board first!"); }
         });
 
-        $('#resetBtn').on('click', function() {
-            game.reset();
-            board.start();
-            clearFeedbackIcons();
-            isGameRunning = false;
-            $status.html('Ready');
-        });
+        $('#resetBtn').click(function() { game.reset(); board.start(); isGameRunning = false; });
+        $('#clearBtn').click(function() { game.clear(); board.clear(); isGameRunning = false; });
 
-        $('#clearBtn').on('click', function() {
-            game.clear();
-            board.clear();
-            clearFeedbackIcons();
-            isGameRunning = false;
-            $status.html('Cleared');
-        });
-
-        // Tray piece connection logic
         $(document).on('mousedown', '.tray-piece', function() {
-            if (!isGameRunning) {
-                clearFeedbackIcons();
-                board.addSparePiece($(this).attr('data-piece'));
-            }
+            if (!isGameRunning) board.addSparePiece($(this).attr('data-piece'));
         });
 
-        var config = {
+        board = Chessboard('myBoard', {
             draggable: true,
             dropOffBoard: 'trash',
-            sparePieces: false,
             position: 'start',
-            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-            onDragStart: onDragStart,
             onDrop: onDrop,
-            onSnapEnd: function() { board.position(game.fen()); }
-        };
-        board = Chessboard('myBoard', config);
-        window.onload = board.resize;
+            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+        });
     </script>
 </body>
 </html>
