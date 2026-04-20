@@ -11,7 +11,6 @@
     <style>
         body { background-color: #0f172a; color: white; font-family: system-ui, sans-serif; }
         
-        /* Main Board Container */
         .board-wrapper {
             width: 100%;
             max-width: 500px;
@@ -20,53 +19,59 @@
 
         #myBoard { 
             width: 100%; 
-            border: 4px solid #334155; 
-            border-radius: 4px; 
+            border: 4px solid #334155;
         }
 
-        /* --- THE SPREAD OUT SPARE PIECE LAYOUT --- */
-        /* This targets the top and bottom trays */
-        div[class^="spare-pieces"] {
+        /* --- THE FINAL HORIZONTAL FIX --- */
+        /* We force the containers to be flex rows and ignore the library's default stacking */
+        .spare-pieces-74527 {
             display: flex !important;
             flex-direction: row !important;
-            /* This spreads pieces out evenly across the board width */
-            justify-content: space-around !important; 
+            justify-content: space-between !important;
             align-items: center !important;
             background: #1e293b !important;
-            padding: 12px 5px !important;
-            height: 70px !important; /* Give them more height so they aren't cramped */
+            padding: 10px !important;
+            height: 65px !important;
             width: 100% !important;
             box-sizing: border-box !important;
             border-left: 4px solid #334155 !important;
             border-right: 4px solid #334155 !important;
+            overflow: hidden !important;
         }
 
-        /* Top tray specific styling */
-        div[class^="spare-pieces-top"] {
+        /* Top tray specific */
+        .spare-pieces-top-402ef {
             border-top: 4px solid #334155 !important;
             border-top-left-radius: 8px !important;
             border-top-right-radius: 8px !important;
         }
 
-        /* Bottom tray specific styling */
-        div[class^="spare-pieces-bottom"] {
+        /* Bottom tray specific */
+        .spare-pieces-bottom-ae33f {
             border-bottom: 4px solid #334155 !important;
             border-bottom-left-radius: 8px !important;
             border-bottom-right-radius: 8px !important;
         }
 
-        /* This fixes the size and spacing of individual off-board pieces */
-        div[class^="spare-piece"] {
-            width: 50px !important;
-            height: 50px !important;
-            position: relative !important; /* Allows them to sit side-by-side */
+        /* Fix individual pieces to stay in line */
+        .spare-piece-af5f1 {
+            position: relative !important;
             float: none !important;
+            width: 14% !important; /* Spreads 6 pieces across 100% width */
+            height: auto !important;
             display: block !important;
         }
 
         .chessboard-63f59 img {
             display: block !important;
             width: 100% !important;
+        }
+
+        /* Ensure the status bar stays at the bottom */
+        .status-container {
+            clear: both;
+            width: 100%;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -76,9 +81,10 @@
         
         <div class="board-wrapper">
             <div id="myBoard"></div>
-            <div class="mt-6 p-4 bg-slate-800 rounded-lg border border-slate-700 text-center">
+            
+            <div class="status-container p-4 bg-slate-800 rounded-lg border border-slate-700 text-center shadow-lg">
                 <span class="text-slate-400 font-mono text-xs uppercase">Game Status:</span>
-                <span id="status" class="text-indigo-400 font-bold ml-2">Ready</span>
+                <span id="status" class="text-indigo-400 font-bold ml-2 text-lg">Ready</span>
             </div>
         </div>
 
@@ -103,7 +109,9 @@
             </div>
 
             <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 text-[11px] text-slate-400 leading-relaxed">
-                <strong>EDITOR MODE:</strong> Drag the pieces from the rows above/below onto the board. Click <strong>Start AI Game</strong> to let the AI analyze the position and play.
+                <p class="font-bold text-slate-300 mb-1">EDITOR MODE:</p>
+                Drag the pieces from the horizontal rows into the board to set a position. 
+                Click <span class="text-indigo-400">Start AI Game</span> to begin analysis.
             </div>
         </div>
     </div>
@@ -118,7 +126,7 @@
         var $status = $('#status');
         var isGameRunning = false;
 
-        // Piece Values for AI
+        // Simple evaluation weights
         var weights = { p: 10, r: 50, n: 30, b: 30, q: 90, k: 900 };
 
         function makeBestMove() {
@@ -183,7 +191,7 @@
             var pos = board.fen();
             var valid = game.load(pos + " w KQkq - 0 1");
             if (!valid) {
-                alert("The board setup is invalid. Do you have both kings?");
+                alert("Invalid position! Make sure both kings are on the board.");
                 return;
             }
             isGameRunning = true;
@@ -220,6 +228,7 @@
         };
         board = Chessboard('myBoard', config);
 
+        // Final cleanup to ensure layout is perfect
         window.onload = function() {
             board.resize();
         };
