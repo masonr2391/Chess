@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chess AI & Editor</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body { background-color: #1a202c; color: white; }
+        .board-container { max-width: 600px; width: 100%; }
+        #myBoard { width: 100%; border: 4px solid #4a5568; border-radius: 8px; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="flex flex-col lg:flex-row gap-8 justify-center items-start">
+        
+        <div class="board-container">
+            <div id="myBoard"></div>
+            <div class="mt-4 p-4 bg-gray-800 rounded-lg shadow-lg">
+                <p class="text-sm font-mono text-gray-400">Status: <span id="status" class="text-green-400">Ready</span></p>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-80 bg-gray-800 p-6 rounded-xl shadow-2xl flex flex-col gap-4">
+            <h1 class="text-2xl font-bold border-b border-gray-700 pb-2">Chess AI Control</h1>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-sm text-gray-400 font-bold">GAME CONTROLS</label>
+                <button id="startBtn" class="bg-blue-600 hover:bg-blue-500 py-2 rounded font-semibold transition">Start AI Game</button>
+                <button id="resetBtn" class="bg-gray-600 hover:bg-gray-500 py-2 rounded font-semibold transition">Reset Board</button>
+                <button id="clearBtn" class="bg-red-900 hover:bg-red-800 py-2 rounded font-semibold transition text-red-200">Clear Board</button>
+            </div>
+
+            <div class="flex flex-col gap-2 mt-4">
+                <label class="text-sm text-gray-400 font-bold">AI DIFFICULTY</label>
+                <select id="difficulty" class="bg-gray-700 p-2 rounded border border-gray-600 focus:outline-none">
+                    <option value="2">Beginner (Fast)</option>
+                    <option value="3" selected>Intermediate</option>
+                    <option value="4">Hard (Slower)</option>
+                </select>
+            </div>
+
+            <div class="mt-4 text-xs text-gray-500 leading-relaxed">
+                <strong>How to Edit:</strong> You can drag pieces freely! To add a piece, reset the board. To clear it, use the 'Clear Board' button. Once you have the position you want, click 'Start AI Game'.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+    <script>
+        // --- CHESS LOGIC ---
+        var board = null;
+        var game = new Chess();
+        var $status = $('#status');
+        var isGameRunning = false;
+
+        // Piece values for the AI to understand "Who is winning?"
+        var pieceValues = {
+            'p': 10, 'r': 50, 'n': 30, 'b': 30, 'q': 90, 'k': 900
+        };
+
+        function onDragStart (source, piece, position, orientation) {
+            // Do not pick up pieces if the game is over
+            if (game.game_over()) return false;
+        }
+
+        function onDrop (source, target) {
+            if (!isGameRunning) {
+                // If we are in "Editor Mode", just update the internal game state
+                // but don't force legal chess rules yet.
+                return;
+            }
+
+            // see if the move is legal
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // always promote to queen for simplicity
+            });
+
+            // illegal move
+            if (move === null) return 'snapback';
+
+            updateStatus();
+            // Wait a tiny bit, then let the AI move
+            window.setTimeout(makeBestMove, 250);
+        }
+
+        // --- THE AI (MINIMAX) ---
+        function makeBestMove() {
+            if (game.game_over()) return;
+
+            var depth = parseInt($('#difficulty').val());
+            var bestMove = minimaxRoot(depth, game, true);
+            game.move(bestMove);
+            board.position(game.fen());
+            updateStatus();
+        }
+
+        function minimaxRoot(depth, game, isMaximizingPlayer) {
+            var newGameMoves = game.moves();
+            var bestMove = -9999;
+            var bestMoveFound;
+
+            for(var i = 0; i < newGameMoves.length; i++) {
+                var newGameMove = newGameMoves[i];
+                game.move(newGameMove);
+                var value = minimax(depth - 1, game, -10000, 10000, !isMaximizingPlayer);
+                game.undo();
+                if(value >= bestMove) {
+                    bestMove = value;
+                    bestMoveFound = newGameMove;
+                }
+            }
+            return bestMoveFound;
+        }
+
+        function minimax(depth, game, alpha, beta, isMaximizingPlayer) {
+            if (depth === 0) return -evaluateBoard(game.board());
+
+            var newGameMoves = game.moves();
+
+            if (isMaximizingPlayer) {
+                var bestMove = -9999;
+                for (var i = 0; i < newGameMoves.length; i++) {
+                    game.move(newGameMoves[i]);
+                    bestMove = Math.max(bestMove, minimax(depth - 1, game, alpha, beta, !isMaximizingPlayer));
+                    game.undo();
+                    alpha = Math.max(alpha, bestMove);
+                    if (beta <= alpha) return bestMove;
+                }
+                return bestMove;
+            } else {
+                var bestMove = 9999;
+                for (var i = 0; i < newGameMoves.length; i++) {
+                    game.move(newGameMoves[i]);
+                    bestMove = Math.min(bestMove, minimax(depth - 1, game, alpha, beta, !isMaximizingPlayer));
+                    game.undo();
+                    beta = Math.min(beta, bestMove);
+                    if (beta <= alpha) return bestMove;
+                }
+                return bestMove;
+            }
+        }
+
+        function evaluateBoard(board) {
+            var totalEvaluation = 0;
+            for (var i = 0; i < 8; i++) {
+                for (var j = 0; j < 8; j++) {
+                    totalEvaluation = totalEvaluation + getPieceValue(board[i][j]);
+                }
+            }
+            return totalEvaluation;
+        }
+
+        function getPieceValue(piece) {
+            if (piece === null) return 0;
+            var getAbsoluteValue = function (piece) {
+                if (piece.type === 'p') return 10;
+                if (piece.type === 'r') return 50;
+                if (piece.type === 'n') return 30;
+                if (piece.type === 'b') return 30;
+                if (piece.type === 'q') return 90;
+                if (piece.type === 'k') return 900;
+                throw "Unknown piece type: " + piece.type;
+            };
+            var absoluteValue = getAbsoluteValue(piece, piece.color === 'w');
+            return piece.color === 'w' ? absoluteValue : -absoluteValue;
+        }
+
+        // --- UTILS ---
+        function updateStatus () {
+            var status = '';
+            var moveColor = (game.turn() === 'b') ? 'Black' : 'White';
+
+            if (game.in_checkmate()) {
+                status = 'Game over, ' + moveColor + ' is in checkmate.';
+            } else if (game.in_draw()) {
+                status = 'Game over, drawn position';
+            } else {
+                status = moveColor + ' to move';
+                if (game.in_check()) {
+                    status += ', ' + moveColor + ' is in check';
+                }
+            }
+            $status.html(status);
+        }
+
+        // --- BUTTON HANDLERS ---
+        $('#startBtn').on('click', function() {
+            var currentPosition = board.fen();
+            game.load(currentPosition + " w KQkq - 0 1"); // Try to load as White's turn
+            isGameRunning = true;
+            board.orientation('white');
+            updateStatus();
+            $status.append(" (AI Started!)");
+        });
+
+        $('#resetBtn').on('click', function() {
+            game.reset();
+            board.start();
+            isGameRunning = false;
+            $status.html('Board Reset');
+        });
+
+        $('#clearBtn').on('click', function() {
+            game.clear();
+            board.clear();
+            isGameRunning = false;
+            $status.html('Board Cleared');
+        });
+
+        // Initialize Board
+        var config = {
+            draggable: true,
+            dropOffBoard: 'trash',
+            sparePieces: true,
+            position: 'start',
+            onDragStart: onDragStart,
+            onDrop: onDrop,
+            onSnapEnd: function() { board.position(game.fen()); }
+        };
+        board = Chessboard('myBoard', config);
+    </script>
+</body>
+</html>
