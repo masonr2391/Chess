@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Advanced Chess AI & Analysis</title>
+    <title>Chess.com Style Analysis Engine</title>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -12,23 +12,17 @@
         .tray-piece { width: 45px; height: 45px; cursor: grab; }
         #myBoard { width: 500px; border: 4px solid #334155; position: relative; }
 
-        /* RECREATED ICONS CSS */
+        /* Official Icon Placement */
         .move-feedback-icon {
-            position: absolute; z-index: 100; width: 32px; height: 32px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            border: 2px solid white; font-weight: 900; top: -8px; right: -8px;
-            pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: absolute;
+            z-index: 100;
+            width: 34px;
+            height: 34px;
+            top: -10px;
+            right: -10px;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
-        .fb-brilliant { background: #15bc9c; color: #fff; } /* !! */
-        .fb-greatmove { background: #40a9ff; color: #fff; } /* ! */
-        .fb-bestmove { background: #96bc4b; color: #fff; }  /* Star */
-        .fb-excellent { background: #b1c43d; color: #fff; } /* Thumb */
-        .fb-good { background: #8da192; color: #fff; }      /* Check */
-        .fb-book { background: #d5a47d; color: #fff; }      /* Book */
-        .fb-inaccuracy { background: #f0c15c; color: #fff; } /* ?! */
-        .fb-mistake { background: #e58f2a; color: #fff; }    /* ? */
-        .fb-miss { background: #f64d4d; color: #fff; }       /* Ø */
-        .fb-blunder { background: #b33430; color: #fff; }    /* ?? */
 
         [class^="spare-pieces"] { display: none !important; }
     </style>
@@ -40,21 +34,21 @@
             <div>
                 <div id="myBoard"></div>
                 <div class="mt-4 p-4 bg-slate-800 rounded border border-slate-700 text-center">
-                    <span id="status" class="text-indigo-400 font-bold">Ready</span>
+                    <span id="status" class="text-indigo-400 font-bold uppercase tracking-widest">Ready</span>
                 </div>
             </div>
             <div class="vertical-tray" id="whiteTray"></div>
         </div>
         <div class="w-80 bg-slate-800 p-6 rounded-xl border border-slate-700">
-            <h1 class="text-xl font-black mb-6 text-indigo-400 uppercase">Analysis Engine</h1>
+            <h1 class="text-xl font-black mb-6 text-indigo-400">CHESS ANALYSIS</h1>
             <button id="startBtn" class="w-full bg-indigo-600 py-3 rounded mb-2 font-bold hover:bg-indigo-500">START GAME</button>
             <button id="resetBtn" class="w-full bg-slate-700 py-3 rounded mb-2 font-semibold">RESET</button>
             <button id="clearBtn" class="w-full bg-slate-700 py-3 rounded mb-6 font-semibold">CLEAR</button>
-            <label class="text-xs font-bold text-slate-500 uppercase">Analysis Depth</label>
+            <label class="text-xs font-bold text-slate-500 uppercase">Engine Depth</label>
             <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded text-white">
-                <option value="3">Fast (Depth 3)</option>
-                <option value="4" selected>Standard (Depth 4)</option>
-                <option value="5">Deep (Depth 5)</option>
+                <option value="3">Level 1 (Fast)</option>
+                <option value="4" selected>Level 2 (Standard)</option>
+                <option value="5">Level 3 (Deep)</option>
             </select>
         </div>
     </div>
@@ -66,16 +60,26 @@
         var board = null, game = new Chess(), isGameRunning = false;
         var aiWorker = new Worker('worker.js');
 
-        const symbolMap = {
-            'brilliant': '!!', 'greatmove': '!', 'bestmove': '★', 
-            'excellent': '👍', 'good': '✓', 'book': '📖', 
-            'inaccuracy': '?!', 'mistake': '?', 'miss': 'Ø', 'blunder': '??'
+        // Official Chess.com SVG assets
+        const iconAssets = {
+            'brilliant': 'https://www.chess.com/node/amp/move-tier-icons/brilliant',
+            'greatmove': 'https://www.chess.com/node/amp/move-tier-icons/greatmove',
+            'bestmove': 'https://www.chess.com/node/amp/move-tier-icons/bestmove',
+            'excellent': 'https://www.chess.com/node/amp/move-tier-icons/excellent',
+            'good': 'https://www.chess.com/node/amp/move-tier-icons/good',
+            'book': 'https://www.chess.com/node/amp/move-tier-icons/book',
+            'inaccuracy': 'https://www.chess.com/node/amp/move-tier-icons/inaccuracy',
+            'mistake': 'https://www.chess.com/node/amp/move-tier-icons/mistake',
+            'miss': 'https://www.chess.com/node/amp/move-tier-icons/miss',
+            'blunder': 'https://www.chess.com/node/amp/move-tier-icons/blunder'
         };
 
         function applyFeedback(square, type) {
             $('.move-feedback-icon').remove();
-            const char = symbolMap[type] || '✓';
-            $('#myBoard .square-' + square).append(`<div class="move-feedback-icon fb-${type}">${char}</div>`);
+            const url = iconAssets[type];
+            if (url) {
+                $('#myBoard .square-' + square).append(`<img src="${url}" class="move-feedback-icon" alt="${type}">`);
+            }
         }
 
         aiWorker.onmessage = function(e) {
@@ -84,7 +88,7 @@
             } else if (e.data.type === 'move') {
                 game.move(e.data.move);
                 board.position(game.fen());
-                $('#status').text(game.turn() === 'w' ? "White's Turn" : "Black's Turn");
+                $('#status').text(game.turn() === 'w' ? "White to move" : "Black to move");
             }
         };
 
@@ -94,7 +98,7 @@
             const move = game.move({ from: source, to: target, promotion: 'q' });
             if (!move) return 'snapback';
             
-            $('#status').text("Engine Analyzing...");
+            $('#status').text("Thinking...");
             aiWorker.postMessage({ 
                 type: 'analyze', 
                 fenBefore: fenBefore, 
