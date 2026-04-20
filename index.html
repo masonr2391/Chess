@@ -11,118 +11,111 @@
     <style>
         body { background-color: #0f172a; color: white; font-family: system-ui, sans-serif; }
         
-        .main-container {
+        /* Layout container for board + vertical pieces */
+        .editor-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-            max-width: 500px;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
             margin: 0 auto;
         }
 
-        /* --- THE MANUAL PIECE TRAY --- */
-        .piece-tray {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-around !important;
-            align-items: center !important;
-            width: 100% !important;
-            background: #1e293b !important;
-            padding: 10px !important;
-            border: 4px solid #334155 !important;
-            border-radius: 8px !important;
-            box-sizing: border-box !important;
+        /* Vertical Trays */
+        .vertical-tray {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 4px;
         }
 
         .tray-piece {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             cursor: grab;
-            transition: transform 0.2s;
+            transition: transform 0.1s;
         }
 
         .tray-piece:active { cursor: grabbing; transform: scale(1.1); }
 
         #myBoard { 
-            width: 100%; 
+            width: 500px; 
             border: 4px solid #334155;
             border-radius: 4px;
         }
 
-        /* Hide the library's broken spare pieces entirely */
-        .spare-pieces-74527, [class^="spare-pieces"] {
+        /* Kill all library spare piece logic */
+        [class^="spare-pieces"] {
             display: none !important;
-            visibility: hidden !important;
             height: 0 !important;
-            overflow: hidden !important;
+            visibility: hidden !important;
         }
 
-        .status-box {
+        .status-area {
             width: 100%;
+            max-width: 500px;
             background: #1e293b;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
             border: 1px solid #334155;
             text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-10">
+<body class="min-h-screen p-4 md:p-10 flex justify-center">
 
-    <div class="flex flex-col lg:flex-row justify-center gap-10 items-start max-w-7xl mx-auto">
+    <div class="flex flex-col lg:flex-row gap-10 items-start">
         
-        <div class="main-container">
-            <div class="piece-tray" id="blackTray">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bK.png" class="tray-piece" data-piece="bK">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png" class="tray-piece" data-piece="bQ">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bR.png" class="tray-piece" data-piece="bR">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bB.png" class="tray-piece" data-piece="bB">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bN.png" class="tray-piece" data-piece="bN">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bP.png" class="tray-piece" data-piece="bP">
+        <div class="flex flex-col items-center">
+            <div class="editor-container">
+                <div class="vertical-tray">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bK.png" class="tray-piece" data-piece="bK">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png" class="tray-piece" data-piece="bQ">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bR.png" class="tray-piece" data-piece="bR">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bB.png" class="tray-piece" data-piece="bB">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bN.png" class="tray-piece" data-piece="bN">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bP.png" class="tray-piece" data-piece="bP">
+                </div>
+
+                <div id="myBoard"></div>
+
+                <div class="vertical-tray">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wK.png" class="tray-piece" data-piece="wK">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png" class="tray-piece" data-piece="wQ">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wR.png" class="tray-piece" data-piece="wR">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wB.png" class="tray-piece" data-piece="wB">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wN.png" class="tray-piece" data-piece="wN">
+                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wP.png" class="tray-piece" data-piece="wP">
+                </div>
             </div>
 
-            <div id="myBoard"></div>
-
-            <div class="piece-tray" id="whiteTray">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wK.png" class="tray-piece" data-piece="wK">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png" class="tray-piece" data-piece="wQ">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wR.png" class="tray-piece" data-piece="wR">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wB.png" class="tray-piece" data-piece="wB">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wN.png" class="tray-piece" data-piece="wN">
-                <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wP.png" class="tray-piece" data-piece="wP">
-            </div>
-
-            <div class="status-box">
-                <span class="text-slate-400 font-mono text-xs uppercase tracking-widest">Status:</span>
-                <span id="status" class="text-indigo-400 font-bold ml-2 text-lg">Ready</span>
+            <div class="status-area">
+                <span class="text-slate-500 font-mono text-xs uppercase uppercase">Game Status:</span>
+                <span id="status" class="text-indigo-400 font-bold ml-2">Ready</span>
             </div>
         </div>
 
-        <div class="w-full lg:w-80 space-y-6">
+        <div class="w-80 space-y-6">
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-2xl">
-                <h1 class="text-2xl font-black mb-6 text-indigo-400 border-b border-slate-700 pb-2">AI EDITOR</h1>
+                <h1 class="text-xl font-black mb-6 text-indigo-400 border-b border-slate-700 pb-2">AI BOARD EDITOR</h1>
                 
                 <div class="space-y-4">
-                    <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-lg font-bold transition shadow-lg active:scale-95">START AI GAME</button>
-                    <button id="resetBtn" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold transition">STANDARD START</button>
-                    <button id="clearBtn" class="w-full bg-rose-900/30 hover:bg-rose-800 border border-rose-800/50 py-3 rounded-lg font-semibold transition">CLEAR BOARD</button>
+                    <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-lg font-bold transition active:scale-95">START AI GAME</button>
+                    <button id="resetBtn" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold">STANDARD START</button>
+                    <button id="clearBtn" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold">CLEAR BOARD</button>
                 </div>
 
                 <div class="mt-8">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-tighter">AI Difficulty</label>
-                    <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded-lg text-white cursor-pointer outline-none">
-                        <option value="2">Level 1: Fast</option>
-                        <option value="3" selected>Level 2: Normal</option>
-                        <option value="4">Level 3: Strategic</option>
+                    <label class="text-xs font-bold text-slate-500 uppercase">AI Difficulty</label>
+                    <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded-lg text-white outline-none">
+                        <option value="2">Level 1</option>
+                        <option value="3" selected>Level 2</option>
+                        <option value="4">Level 3</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="bg-slate-900/50 p-5 rounded-lg border border-slate-700 text-xs text-slate-400 leading-relaxed shadow-inner">
-                <p><strong>HOW TO EDIT:</strong></p>
-                <p class="mt-2">Drag pieces from the horizontal trays into any square. To remove a piece, just drag it off the board. Once the setup is done, click Start.</p>
             </div>
         </div>
     </div>
@@ -137,8 +130,25 @@
         var $status = $('#status');
         var isGameRunning = false;
 
-        // AI Weights
         var weights = { p: 10, r: 50, n: 30, b: 30, q: 90, k: 900 };
+
+        function makeBestMove() {
+            if (game.game_over()) return;
+            var moves = game.moves();
+            if (moves.length === 0) return;
+            var depth = parseInt($('#difficulty').val());
+            var bestMove = moves[Math.floor(Math.random() * moves.length)];
+            var bestValue = -9999;
+            for(var i = 0; i < moves.length; i++) {
+                game.move(moves[i]);
+                var val = -evaluateBoard(game.board());
+                game.undo();
+                if(val > bestValue) { bestValue = val; bestMove = moves[i]; }
+            }
+            game.move(bestMove);
+            board.position(game.fen());
+            updateStatus();
+        }
 
         function evaluateBoard(board) {
             var total = 0;
@@ -152,29 +162,6 @@
                 }
             }
             return total;
-        }
-
-        function makeBestMove() {
-            if (game.game_over()) return;
-            var moves = game.moves();
-            if (moves.length === 0) return;
-
-            var depth = parseInt($('#difficulty').val());
-            var bestMove = moves[Math.floor(Math.random() * moves.length)];
-            var bestValue = -9999;
-
-            for(var i = 0; i < moves.length; i++) {
-                game.move(moves[i]);
-                var boardValue = -evaluateBoard(game.board());
-                game.undo();
-                if(boardValue > bestValue) {
-                    bestValue = boardValue;
-                    bestMove = moves[i];
-                }
-            }
-            game.move(bestMove);
-            board.position(game.fen());
-            updateStatus();
         }
 
         function onDrop (source, target) {
@@ -192,52 +179,30 @@
             else $status.html(turn + ' to move');
         }
 
-        // --- BUTTONS ---
         $('#startBtn').on('click', function() {
-            var pos = board.fen();
-            var valid = game.load(pos + " w KQkq - 0 1");
-            if (!valid) {
-                alert("Missing Kings! Please add both kings to the board.");
-                return;
-            }
+            var valid = game.load(board.fen() + " w KQkq - 0 1");
+            if (!valid) { alert("Add both kings!"); return; }
             isGameRunning = true;
             updateStatus();
         });
 
-        $('#resetBtn').on('click', function() {
-            game.reset();
-            board.start();
-            isGameRunning = false;
-            $status.html('Ready');
+        $('#resetBtn').on('click', function() { game.reset(); board.start(); isGameRunning = false; $status.html('Ready'); });
+        $('#clearBtn').on('click', function() { game.clear(); board.clear(); isGameRunning = false; $status.html('Cleared'); });
+
+        // Manually handle tray pieces
+        $(document).on('mousedown', '.tray-piece', function() {
+            if (!isGameRunning) board.addSparePiece($(this).attr('data-piece'));
         });
 
-        $('#clearBtn').on('click', function() {
-            game.clear();
-            board.clear();
-            isGameRunning = false;
-            $status.html('Board Cleared');
-        });
-
-        // --- THE FIX: MANUALLY CONNECTING PIECES TO BOARD ---
-        $(document).on('mousedown', '.tray-piece', function(e) {
-            if (isGameRunning) return;
-            var piece = $(this).attr('data-piece');
-            // This triggers the library's internal drag for the piece
-            board.addSparePiece(piece);
-        });
-
-        var config = {
+        board = Chessboard('myBoard', {
             draggable: true,
             dropOffBoard: 'trash',
-            sparePieces: false, // Turned OFF to prevent library bugs
+            sparePieces: false,
             position: 'start',
             pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
             onDrop: onDrop,
             onSnapEnd: function() { board.position(game.fen()); }
-        };
-        board = Chessboard('myBoard', config);
-
-        window.onload = function() { board.resize(); };
+        });
     </script>
 </body>
 </html>
