@@ -2,263 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess AI & Editor</title>
-    
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        body { background-color: #0f172a; color: white; font-family: system-ui, sans-serif; overflow-x: hidden; }
-        
-        .editor-container {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            gap: 15px;
-            margin: 0 auto;
-        }
-
-        /* Vertical Trays on the sides */
-        .vertical-tray {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 12px;
-            background: #1e293b;
-            border: 2px solid #334155;
-            border-radius: 8px;
-        }
-
-        .tray-piece {
-            width: 45px;
-            height: 45px;
-            cursor: grab;
-            transition: transform 0.1s;
-        }
-
-        #myBoard { 
-            width: 500px; 
-            border: 4px solid #334155;
-            border-radius: 4px;
-            position: relative;
-        }
-
-        /* Hide library broken elements */
-        [class^="spare-pieces"] { display: none !important; }
-
-        /* Feedback Icons */
-        .move-feedback-icon {
-            position: absolute;
-            z-index: 100;
-            width: 28px;
-            height: 28px;
-            pointer-events: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 5px rgba(0,0,0,0.6);
-            border: 2px solid white;
-            font-size: 14px;
-            font-weight: bold;
-            top: -5px;
-            right: -5px;
-        }
-
-        .feedback-brilliant { background-color: #03a9f4; }
-        .feedback-greatmove { background-color: #0288d1; }
-        .feedback-bestmove { background-color: #a7ffeb; color: #1e3a8a; }
-        .feedback-excellent { background-color: #69f0ae; color: #1a4d1a; }
-        .feedback-good { background-color: #b9f6ca; color: #1a4d1a; }
-        .feedback-inaccuracy { background-color: #ffd54f; color: #4e342e; }
-        .feedback-mistake { background-color: #ff9800; }
-        .feedback-miss { background-color: #e57373; }
+        body { background-color: #0f172a; color: white; font-family: sans-serif; overflow-x: hidden; }
+        .editor-container { display: flex; gap: 15px; margin: 0 auto; align-items: flex-start; }
+        .vertical-tray { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #1e293b; border: 2px solid #334155; border-radius: 8px; }
+        .tray-piece { width: 45px; height: 45px; cursor: grab; }
+        #myBoard { width: 500px; border: 4px solid #334155; position: relative; }
+        /* Feedback Icons Styles */
+        .move-feedback-icon { position: absolute; z-index: 100; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-weight: bold; top: -5px; right: -5px; pointer-events: none; }
+        .feedback-brilliant { background-color: #03a9f4; } .feedback-greatmove { background-color: #0288d1; }
+        .feedback-bestmove { background-color: #a7ffeb; color: #1e3a8a; } .feedback-excellent { background-color: #69f0ae; color: #1a4d1a; }
+        .feedback-good { background-color: #b9f6ca; color: #1a4d1a; } .feedback-inaccuracy { background-color: #ffd54f; color: #4e342e; }
+        .feedback-mistake { background-color: #ff9800; } .feedback-miss { background-color: #e57373; }
         .feedback-blunder { background-color: #b71c1c; }
-
-        .status-area {
-            width: 100%;
-            max-width: 500px;
-            background: #1e293b;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            text-align: center;
-        }
+        [class^="spare-pieces"] { display: none !important; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-10 flex justify-center">
-
-    <div class="flex flex-col lg:flex-row gap-10 items-start">
-        <div class="flex flex-col items-center">
-            <div class="editor-container">
-                <div class="vertical-tray">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bK.png" class="tray-piece" data-piece="bK">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png" class="tray-piece" data-piece="bQ">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bR.png" class="tray-piece" data-piece="bR">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bB.png" class="tray-piece" data-piece="bB">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bN.png" class="tray-piece" data-piece="bN">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/bP.png" class="tray-piece" data-piece="bP">
-                </div>
-
+<body class="p-10 flex justify-center">
+    <div class="flex flex-col lg:flex-row gap-10">
+        <div class="editor-container">
+            <div class="vertical-tray" id="blackTray"></div>
+            <div>
                 <div id="myBoard"></div>
-
-                <div class="vertical-tray">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wK.png" class="tray-piece" data-piece="wK">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png" class="tray-piece" data-piece="wQ">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wR.png" class="tray-piece" data-piece="wR">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wB.png" class="tray-piece" data-piece="wB">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wN.png" class="tray-piece" data-piece="wN">
-                    <img src="https://chessboardjs.com/img/chesspieces/wikipedia/wP.png" class="tray-piece" data-piece="wP">
+                <div class="mt-4 p-4 bg-slate-800 rounded border border-slate-700 text-center">
+                    <span id="status" class="text-indigo-400 font-bold">Ready</span>
                 </div>
             </div>
-
-            <div class="status-area">
-                <span id="status" class="text-indigo-400 font-bold text-lg">Ready</span>
-            </div>
+            <div class="vertical-tray" id="whiteTray"></div>
         </div>
-
-        <div class="w-80 space-y-6">
-            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                <h1 class="text-xl font-black mb-6 text-indigo-400 border-b border-slate-700 pb-2 uppercase">Control Panel</h1>
-                <div class="space-y-4">
-                    <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-lg font-bold">START GAME</button>
-                    <button id="resetBtn" class="w-full bg-slate-700 py-3 rounded-lg font-semibold">RESET</button>
-                    <button id="clearBtn" class="w-full bg-slate-700 py-3 rounded-lg font-semibold">CLEAR</button>
-                </div>
-                <div class="mt-8">
-                    <label class="text-xs font-bold text-slate-500 uppercase">AI Level</label>
-                    <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded-lg text-white">
-                        <option value="2">Level 1</option>
-                        <option value="3" selected>Level 2</option>
-                        <option value="4">Level 3 (Slow)</option>
-                    </select>
-                </div>
-            </div>
+        <div class="w-80 bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h1 class="text-xl font-black mb-6 text-indigo-400">AI CONTROL</h1>
+            <button id="startBtn" class="w-full bg-indigo-600 py-3 rounded mb-2 font-bold">START AI GAME</button>
+            <button id="resetBtn" class="w-full bg-slate-700 py-3 rounded mb-2 font-semibold">RESET BOARD</button>
+            <button id="clearBtn" class="w-full bg-slate-700 py-3 rounded mb-6 font-semibold">CLEAR BOARD</button>
+            <label class="text-xs font-bold text-slate-500 uppercase">Difficulty</label>
+            <select id="difficulty" class="w-full mt-2 bg-slate-900 border border-slate-600 p-3 rounded text-white">
+                <option value="2">Level 1</option>
+                <option value="3" selected>Level 2</option>
+                <option value="4">Level 3</option>
+            </select>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-
     <script>
-        var board = null;
-        var game = new Chess();
-        var isGameRunning = false;
+        var board = null, game = new Chess(), isGameRunning = false;
+        var aiWorker = new Worker('worker.js');
 
-        // --- AI EVALUATION ---
-        const pieceValues = { p: 100, r: 500, n: 320, b: 330, q: 900, k: 20000 };
-        
-        function evaluateBoard(g) {
-            let total = 0;
-            const b = g.board();
-            for (let i = 0; i < 8; i++) {
-                for (let j = 0; j < 8; j++) {
-                    const p = b[i][j];
-                    if (p) total += (p.color === 'w' ? 1 : -1) * pieceValues[p.type];
-                }
-            }
-            return total;
-        }
-
-        function minimax(depth, g, alpha, beta, isMax) {
-            if (depth === 0 || g.game_over()) return evaluateBoard(g);
-            const moves = g.moves();
-            if (isMax) {
-                let best = -Infinity;
-                for (let m of moves) {
-                    g.move(m);
-                    best = Math.max(best, minimax(depth - 1, g, alpha, beta, !isMax));
-                    g.undo();
-                    alpha = Math.max(alpha, best);
-                    if (beta <= alpha) break;
-                }
-                return best;
-            } else {
-                let best = Infinity;
-                for (let m of moves) {
-                    g.move(m);
-                    best = Math.min(best, minimax(depth - 1, g, alpha, beta, !isMax));
-                    g.undo();
-                    beta = Math.min(beta, best);
-                    if (beta <= alpha) break;
-                }
-                return best;
-            }
-        }
-
-        function makeAiMove() {
-            if (game.game_over()) return;
-            
-            const depth = parseInt($('#difficulty').val());
-            const moves = game.moves();
-            let bestMove = null;
-            let bestValue = game.turn() === 'w' ? -Infinity : Infinity;
-
-            for (let m of moves) {
-                game.move(m);
-                let boardVal = minimax(depth - 1, game, -Infinity, Infinity, game.turn() === 'w');
-                game.undo();
-                if (game.turn() === 'w' && boardVal > bestValue) { bestValue = boardVal; bestMove = m; }
-                else if (game.turn() === 'b' && boardVal < bestValue) { bestValue = boardVal; bestMove = m; }
-            }
-
-            const moveInfo = game.move(bestMove);
-            board.position(game.fen());
-            applyFeedback(moveInfo.to, "bestmove", "★");
-            updateStatus();
-        }
-
-        // --- FEEDBACK SYSTEM ---
         function applyFeedback(square, type, char) {
             $('.move-feedback-icon').remove();
-            const icon = `<div class="move-feedback-icon feedback-${type}">${char}</div>`;
-            $('#myBoard .square-' + square).append(icon);
+            $('#myBoard .square-' + square).append(`<div class="move-feedback-icon feedback-${type}">${char}</div>`);
         }
 
-        function updateStatus() {
-            let status = game.turn() === 'w' ? "White's Turn" : "Black's Turn";
-            if (game.in_checkmate()) status = "Checkmate!";
-            $('#status').text(status);
-        }
+        aiWorker.onmessage = function(e) {
+            const move = game.move(e.data.move);
+            board.position(game.fen());
+            applyFeedback(move.to, "bestmove", "★"); // AI always tries to find "Best"
+            $('#status').text(game.turn() === 'w' ? "White's Turn" : "Black's Turn");
+        };
 
-        // --- HANDLERS ---
         function onDrop(source, target) {
             if (!isGameRunning) return;
             const move = game.move({ from: source, to: target, promotion: 'q' });
-            if (move === null) return 'snapback';
-
-            // User Feedback (Simple Logic)
+            if (!move) return 'snapback';
             applyFeedback(target, "good", "✓");
-            updateStatus();
-
-            // The "Anti-Freeze" Fix: Wait 100ms before AI starts
-            window.setTimeout(makeAiMove, 100);
+            $('#status').text("AI is thinking...");
+            aiWorker.postMessage({ fen: game.fen(), depth: $('#difficulty').val() });
         }
 
-        $('#startBtn').click(function() {
-            if (game.load(board.fen() + " w KQkq - 0 1")) {
-                isGameRunning = true;
-                updateStatus();
-            } else { alert("Setup board first!"); }
+        // Initialize Trays
+        ['k','q','r','b','n','p'].forEach(p => {
+            $('#blackTray').append(`<img src="https://chessboardjs.com/img/chesspieces/wikipedia/b${p.toUpperCase()}.png" class="tray-piece" data-piece="b${p.toUpperCase()}">`);
+            $('#whiteTray').append(`<img src="https://chessboardjs.com/img/chesspieces/wikipedia/w${p.toUpperCase()}.png" class="tray-piece" data-piece="w${p.toUpperCase()}">`);
         });
 
-        $('#resetBtn').click(function() { game.reset(); board.start(); isGameRunning = false; });
-        $('#clearBtn').click(function() { game.clear(); board.clear(); isGameRunning = false; });
+        $(document).on('mousedown', '.tray-piece', function() { if(!isGameRunning) board.addSparePiece($(this).data('piece')); });
+        $('#startBtn').click(() => { if(game.load(board.fen() + " w KQkq - 0 1")) isGameRunning = true; });
+        $('#resetBtn').click(() => { game.reset(); board.start(); isGameRunning = false; $('.move-feedback-icon').remove(); });
+        $('#clearBtn').click(() => { game.clear(); board.clear(); isGameRunning = false; $('.move-feedback-icon').remove(); });
 
-        $(document).on('mousedown', '.tray-piece', function() {
-            if (!isGameRunning) board.addSparePiece($(this).attr('data-piece'));
-        });
-
-        board = Chessboard('myBoard', {
-            draggable: true,
-            dropOffBoard: 'trash',
-            position: 'start',
-            onDrop: onDrop,
-            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-        });
+        board = Chessboard('myBoard', { draggable: true, dropOffBoard: 'trash', position: 'start', onDrop: onDrop, pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png' });
     </script>
 </body>
 </html>
